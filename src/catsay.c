@@ -7,10 +7,10 @@
 #include <string.h>
 
 
-#define RAW_OUTPUT_CAP 1024
-#define BUFFER_CAP 100
+#define RAW_OUTPUT_CAP (1024*1024*8)
+#define BUFFER_CAP (1024*1024)
 
-#define MAX_LINE_LEN 80
+#define MAX_LINE_LEN 50
 
 
 int min(int a, int b) {
@@ -18,13 +18,13 @@ int min(int a, int b) {
 }
 
 
-int main(int argc, char **argv) 
+int main(int argc, char **argv)
 {
     setlocale(LC_ALL, "");
 
     size_t actual_size = 0;
     size_t allocated_size = RAW_OUTPUT_CAP;
-    wchar_t *raw_output = malloc((RAW_OUTPUT_CAP + 1)*sizeof(wchar_t)); 
+    wchar_t *raw_output = malloc((RAW_OUTPUT_CAP + 1)*sizeof(wchar_t));
     if (raw_output == NULL) {
         fprintf(stderr, "ERROR: Buy more RAM!!!\n");
         return 1;
