@@ -60,37 +60,40 @@ int main(int argc, char **argv)
             wchar_t *temp = malloc((arg_len + 1) * sizeof(wchar_t));
             if (mbstowcs(temp, argv[i], arg_len + 1) == (size_t) -1) {
                 fprintf(stderr, "ERROR: failed convert!\n");
-                return 1; 
+                return 1;
             }
             raw_output = wcscat(raw_output, temp);
             if (i < argc - 1) raw_output = wcscat(raw_output, L" ");
+            free(temp);
         }
-    } 
-    
-    for (size_t i = 0; i < wcslen(raw_output); i++) {
-        if (raw_output[i] == L'\n') raw_output[i] = L' '; 
-    } 
-    
-    size_t frame_len = min(MAX_LINE_LEN, wcslen(raw_output)) + 2; 
+    }
 
-    printf("/"); 
-    for (size_t i = 0; i < frame_len; i++) printf("-");
-    printf("\\\n");
+    size_t raw_output_len = wcslen(raw_output);
 
-    size_t lines = wcslen(raw_output) / MAX_LINE_LEN + 1;
+    size_t frame_len = min(MAX_LINE_LEN, raw_output_len) + 2;
+    char *frame = malloc(sizeof(char)*(frame_len+1));
+    memset(frame, '-', sizeof(char)*(frame_len));
+    frame[frame_len] = '\0';
+
+    printf("/%s\\\n", frame);
+    size_t lines = raw_output_len / MAX_LINE_LEN + 1;
     for (size_t line = 0; line < lines; ++line) {
         size_t offset = line * MAX_LINE_LEN;
-        size_t end = offset + MAX_LINE_LEN; 
-        if (end > wcslen(raw_output)) end = wcslen(raw_output);
+        size_t end = offset + MAX_LINE_LEN;
+        if (end > raw_output_len) end = raw_output_len;
 
         wchar_t buffer[MAX_LINE_LEN+1];
         memset(buffer, 0, sizeof(wchar_t)*(MAX_LINE_LEN+1));
         memcpy(buffer, raw_output+offset, (end-offset)*sizeof(wchar_t));
+
+        wchar_t *tmp;
+        while ((tmp = wcschr(buffer, L'\n')) != NULL) {
+            *tmp = L' ';
+        }
+
         printf("| %ls%-*s |\n", buffer, (int)(frame_len - 2 - wcslen(buffer)), "");
     }
-    printf("\\"); 
-    for (size_t i = 0; i < frame_len; i++) printf("-");
-    printf("/\n");
+    printf("\\%s/\n", frame);
 
     printf("  \\\n");
     printf("   \\    ,_     _             \n");
@@ -104,6 +107,7 @@ int main(int argc, char **argv)
     printf("         || |-_\\__   /      \n");
     printf("        ((_/`(____,-'        \n");
 
+    free(frame);
     free(raw_output);
     return 0;
 }
